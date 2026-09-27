@@ -1,5 +1,10 @@
 plugins {
     id("java")
+    application
+}
+
+application {
+    mainClass.set("it.unibo.agar.Main")
 }
 
 group = "org.example"
