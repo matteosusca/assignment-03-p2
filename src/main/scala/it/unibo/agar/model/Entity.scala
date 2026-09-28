@@ -7,10 +7,10 @@ trait Entity:
   def y: Double
   def radius: Double
 
-  def getId: String = id
-  def getMass: Double = mass
-  def getX: Double = x
-  def getY: Double = y
+  def getId: String     = id
+  def getMass: Double   = mass
+  def getX: Double      = x
+  def getY: Double      = y
   def getRadius: Double = radius
 
   def distanceTo(other: Entity): Double =

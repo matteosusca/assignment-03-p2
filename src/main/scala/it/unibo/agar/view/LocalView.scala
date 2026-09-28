@@ -19,26 +19,26 @@ class LocalView(val gameStateManager: GameStateManager, val playerId: String) ex
   setLocationRelativeTo(null)
 
   private def setupMouseControls(): Unit =
-    gamePanel.addMouseMotionListener(new MouseMotionAdapter:
-      override def mouseMoved(e: MouseEvent): Unit =
-        gameStateManager.world.getPlayerById(playerId).foreach { _ =>
-          val mousePos: Point = e.getPoint
-          val viewCenterX = gamePanel.getWidth / 2.0
-          val viewCenterY = gamePanel.getHeight / 2.0
+    gamePanel.addMouseMotionListener(
+      new MouseMotionAdapter:
+        override def mouseMoved(e: MouseEvent): Unit =
+          gameStateManager.world.getPlayerById(playerId).foreach { _ =>
+            val mousePos: Point = e.getPoint
+            val viewCenterX     = gamePanel.getWidth / 2.0
+            val viewCenterY     = gamePanel.getHeight / 2.0
 
-          val dx = mousePos.x - viewCenterX
-          val dy = mousePos.y - viewCenterY
+            val dx = mousePos.x - viewCenterX
+            val dy = mousePos.y - viewCenterY
 
-          val magnitude = Math.hypot(dx, dy)
-          if magnitude > 0 then
-            gameStateManager.setPlayerDirection(
-              playerId,
-              (dx / magnitude) * LocalView.SENSITIVITY,
-              (dy / magnitude) * LocalView.SENSITIVITY
-            )
-          else
-            gameStateManager.setPlayerDirection(playerId, 0, 0)
-        }
+            val magnitude = Math.hypot(dx, dy)
+            if magnitude > 0 then
+              gameStateManager.setPlayerDirection(
+                playerId,
+                (dx / magnitude) * LocalView.SENSITIVITY,
+                (dy / magnitude) * LocalView.SENSITIVITY
+              )
+            else gameStateManager.setPlayerDirection(playerId, 0, 0)
+          }
     )
 
   def repaintView(): Unit =

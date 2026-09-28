@@ -16,7 +16,7 @@ class GamePanel(val gameStateManager: GameStateManager, val focusedPlayerId: Opt
 
   override protected def paintComponent(g: Graphics): Unit =
     super.paintComponent(g)
-    val g2d = g.asInstanceOf[Graphics2D]
+    val g2d   = g.asInstanceOf[Graphics2D]
     val world = gameStateManager.world
 
     focusedPlayerId match

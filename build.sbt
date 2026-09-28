@@ -7,6 +7,9 @@ lazy val root = (project in file("."))
     Compile / mainClass := Some("it.unibo.agar.Main"),
     fork := true,
     libraryDependencies ++= Seq(
+      "com.rabbitmq" % "amqp-client" % "5.25.0",
+      "com.lihaoyi" %% "upickle" % "4.0.2",
+      "org.slf4j" % "slf4j-simple" % "2.0.16",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test
     )
   )

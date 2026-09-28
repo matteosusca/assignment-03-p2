@@ -7,10 +7,10 @@ import java.util.{Timer, TimerTask}
 import scala.collection.mutable.ListBuffer
 
 object Main:
-  private val WORLD_WIDTH = 1000
+  private val WORLD_WIDTH  = 1000
   private val WORLD_HEIGHT = 1000
-  private val NUM_PLAYERS = 4 // p1, p2, p3, p4
-  private val NUM_FOODS = 100
+  private val NUM_PLAYERS  = 4   // p1, p2, p3, p4
+  private val NUM_FOODS    = 100
   private val GAME_TICK_MS = 30L // Corresponds to ~33 FPS
 
   @FunctionalInterface
@@ -18,9 +18,9 @@ object Main:
     def repaintView(): Unit
 
   def main(args: Array[String]): Unit =
-    val initialPlayers = GameInitializer.initialPlayers(NUM_PLAYERS, WORLD_WIDTH, WORLD_HEIGHT)
-    val initialFoods = GameInitializer.initialFoods(NUM_FOODS, WORLD_WIDTH, WORLD_HEIGHT)
-    val initialWorld = World(WORLD_WIDTH, WORLD_HEIGHT, initialPlayers, initialFoods)
+    val initialPlayers                = GameInitializer.initialPlayers(NUM_PLAYERS, WORLD_WIDTH, WORLD_HEIGHT)
+    val initialFoods                  = GameInitializer.initialFoods(NUM_FOODS, WORLD_WIDTH, WORLD_HEIGHT)
+    val initialWorld                  = World(WORLD_WIDTH, WORLD_HEIGHT, initialPlayers, initialFoods)
     val gameManager: GameStateManager = DefaultGameStateManager(initialWorld)
 
     val views = ListBuffer[JFrameRepaintable]()
@@ -40,15 +40,17 @@ object Main:
     )
 
     val timer = Timer(true)
-    timer.scheduleAtFixedRate(new TimerTask:
-      override def run(): Unit =
-        AIMovement.moveAI("p1", gameManager)
-        AIMovement.moveAI("p3", gameManager)
-        AIMovement.moveAI("p4", gameManager)
+    timer.scheduleAtFixedRate(
+      new TimerTask:
+        override def run(): Unit =
+          AIMovement.moveAI("p1", gameManager)
+          AIMovement.moveAI("p3", gameManager)
+          AIMovement.moveAI("p4", gameManager)
 
-        gameManager.tick()
+          gameManager.tick()
 
-        SwingUtilities.invokeLater(() =>
-          views.foreach(_.repaintView())
-        )
-    , 0, GAME_TICK_MS)
+          SwingUtilities.invokeLater(() => views.foreach(_.repaintView()))
+      ,
+      0,
+      GAME_TICK_MS
+    )
