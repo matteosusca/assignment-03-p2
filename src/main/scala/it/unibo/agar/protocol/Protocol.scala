@@ -11,3 +11,26 @@ enum PlayerCommand derives ReadWriter:
 
 	// promise that all commands have a playerId
 	def playerId: String
+
+case class PlayerSnapshot(
+	id: String,
+	x: Double,
+	y: Double,
+	radius: Double,
+	mass: Double
+) derives ReadWriter
+
+case class FoodSnapshot(
+	id: String,
+	x: Double,
+	y: Double,
+	radius: Double
+) derives ReadWriter
+
+case class WorldSnapshot(
+	tickNumber: Long,
+	players: Seq[PlayerSnapshot],
+	foods: Seq[FoodSnapshot],
+	isGameOver: Boolean,
+	winnerId: Option[String] = None
+) derives ReadWriter
