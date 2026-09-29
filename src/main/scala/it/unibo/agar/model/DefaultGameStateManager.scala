@@ -52,13 +52,13 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
     _world.players.foreach(p => playerDirections.getOrElseUpdate(p.id, Position.ZERO))
 
   override def join(playerId: String): Unit =
-    val (x, y) = world.generateRandomPosition()
-    join(playerId, x, y)
+    val pos = world.generateRandomPosition()
+    join(playerId, pos)
 
-  override def join(playerId: String, x: Double, y: Double, mass: Double = Player.DEFAULT_MASS): Unit =
+  override def join(playerId: String, pos: Position, mass: Double = Player.DEFAULT_MASS): Unit =
     if _world.getPlayerById(playerId).isEmpty then
-      val newPlayer = Player(playerId, x, y, mass)
-      _world = world.copy(players = newPlayer :: _world.players)
+      val newPlayer = Player(playerId, pos.x, pos.y, mass)
+      _world = _world.addPlayer(newPlayer)
       playerDirections.put(playerId, Position.ZERO)
 
 object DefaultGameStateManager:

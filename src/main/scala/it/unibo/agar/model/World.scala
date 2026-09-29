@@ -16,6 +16,9 @@ case class World(
 
   def getPlayerById(id: String): Option[Player] =
     players.find(_.id == id)
+    
+  def addPlayer(player: Player): World =
+    copy(players = player :: players)
 
   def removePlayers(playersToRemove: List[Player]): World =
     val idsToRemove = playersToRemove.map(_.id).toSet
@@ -27,7 +30,7 @@ case class World(
     val newFoods    = foods.filterNot(toRemoveSet.contains)
     copy(foods = newFoods)
     
-  def generateRandomPosition(): (Double, Double) =
+  def generateRandomPosition(): Position =
     val x = scala.util.Random.nextDouble() * width
     val y = scala.util.Random.nextDouble() * height
-    (x, y)
+    Position.of(x, y)
