@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
   private var _world: World                                   = initialWorld
-  private var tickNumber: Long = 0L
+  private var tickNumber: Long                                = 0L
   private val playerDirections: mutable.Map[String, Position] = mutable.Map.empty
 
   _world.players.foreach(p => playerDirections.put(p.id, Position.ZERO))
@@ -69,15 +69,21 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
     _world = _world.removePlayer(playerId)
     playerDirections.remove(playerId)
 
-  override def toSnapshot(): WorldSnapshot = 
+  override def toSnapshot(): WorldSnapshot =
     WorldSnapshot(
-      tickNumber = tickNumber, 
-      players = world.players.map(p => PlayerSnapshot(p.id, p.x, p.y, p.mass)), 
-      foods = world.foods.map(f => it.unibo.agar.protocol.FoodSnapshot(f.id, f.x, f.y)),
-      isGameOver = false, 
+      tickNumber = tickNumber,
+      players = world.players.map(_.toSnapshot),
+      foods = world.foods.map(_.toSnapshot),
+      isGameOver = false,
       winnerId = None
     )
 
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0
   val MAX_FOOD_ITEMS: Int  = 150
+
+extension (p: Player)
+  def toSnapshot: PlayerSnapshot = PlayerSnapshot(p.id, p.x, p.y, p.mass)
+
+extension (f: Food)
+  def toSnapshot: it.unibo.agar.protocol.FoodSnapshot = it.unibo.agar.protocol.FoodSnapshot(f.id, f.x, f.y)
