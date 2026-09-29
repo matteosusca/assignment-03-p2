@@ -34,6 +34,7 @@ case class World(
     copy(foods = newFoods)
     
   def generateRandomPosition(): Position =
-    val x = scala.util.Random.nextDouble() * width
-    val y = scala.util.Random.nextDouble() * height
-    Position.of(x, y)
+    Position.of(
+      scala.util.Random.nextDouble() * width,
+      scala.util.Random.nextDouble() * height
+    )
