@@ -1,6 +1,6 @@
 package it.unibo.agar.model
 
-import it.unibo.agar.protocol.{PlayerSnapshot, WorldSnapshot}
+import it.unibo.agar.protocol.{FoodSnapshot, PlayerSnapshot, WorldSnapshot}
 
 import scala.collection.mutable
 
@@ -86,4 +86,4 @@ extension (p: Player)
   def toSnapshot: PlayerSnapshot = PlayerSnapshot(p.id, p.x, p.y, p.mass)
 
 extension (f: Food)
-  def toSnapshot: it.unibo.agar.protocol.FoodSnapshot = it.unibo.agar.protocol.FoodSnapshot(f.id, f.x, f.y)
+  def toSnapshot: FoodSnapshot = FoodSnapshot(f.id, f.x, f.y)
