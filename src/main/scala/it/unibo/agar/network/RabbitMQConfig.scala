@@ -12,5 +12,5 @@ object RabbitMQConfig:
 		factory.newConnection()
 
 	def setupTopology(channel: Channel): Unit =
-		channel.queueDeclare(CommandsQueue, false, false, false, null)
+		channel.queueDeclare(CommandsQueue, true, false, false, null)
 		channel.exchangeDeclare(WorldExchange, BuiltinExchangeType.FANOUT)
