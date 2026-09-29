@@ -20,6 +20,9 @@ case class World(
   def addPlayer(player: Player): World =
     copy(players = player :: players)
 
+  def removePlayer(playerId: String): World =
+    copy(players = players.filterNot(_.id == playerId))
+
   def removePlayers(playersToRemove: List[Player]): World =
     val idsToRemove = playersToRemove.map(_.id).toSet
     val newPlayers  = players.filterNot(p => idsToRemove.contains(p.id))

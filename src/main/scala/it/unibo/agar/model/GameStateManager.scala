@@ -7,3 +7,4 @@ trait GameStateManager:
   def tick(): Unit
   def join(playerId: String): Unit
   def join(playerId: String, pos: Position, mass: Double = Player.DEFAULT_MASS): Unit
+  def leave(playerId: String): Unit

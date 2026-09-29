@@ -61,6 +61,10 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
       _world = _world.addPlayer(newPlayer)
       playerDirections.put(playerId, Position.ZERO)
 
+  override def leave(playerId: String): Unit =
+    _world = _world.removePlayer(playerId)
+    playerDirections.remove(playerId)
+
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0
   val MAX_FOOD_ITEMS: Int  = 150
