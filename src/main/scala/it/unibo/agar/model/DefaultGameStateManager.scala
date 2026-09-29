@@ -51,6 +51,16 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
     playerDirections.filterInPlace((id, _) => currentPlayerIds.contains(id))
     _world.players.foreach(p => playerDirections.getOrElseUpdate(p.id, Position.ZERO))
 
+  override def join(playerId: String): Unit =
+    val (x, y) = world.generateRandomPosition()
+    join(playerId, x, y)
+
+  override def join(playerId: String, x: Double, y: Double, mass: Double = Player.DEFAULT_MASS): Unit =
+    if _world.getPlayerById(playerId).isEmpty then
+      val newPlayer = Player(playerId, x, y, mass)
+      _world = world.copy(players = newPlayer :: _world.players)
+      playerDirections.put(playerId, Position.ZERO)
+
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0
   val MAX_FOOD_ITEMS: Int  = 150

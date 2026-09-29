@@ -26,3 +26,8 @@ case class World(
     val toRemoveSet = foodsToRemove.toSet
     val newFoods    = foods.filterNot(toRemoveSet.contains)
     copy(foods = newFoods)
+    
+  def generateRandomPosition(): (Double, Double) =
+    val x = scala.util.Random.nextDouble() * width
+    val y = scala.util.Random.nextDouble() * height
+    (x, y)
