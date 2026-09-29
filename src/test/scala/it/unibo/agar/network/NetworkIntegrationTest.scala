@@ -24,7 +24,7 @@ class NetworkIntegrationTest extends AnyFunSuite with Matchers:
 		receivedCommands.poll(3, TimeUnit.SECONDS) shouldBe moveCmd
 
 		// 2. Server broadcasts a world snapshot
-		val snapshot = WorldSnapshot(1L, Seq(PlayerSnapshot("p1", 10, 20, 5, 50)), Seq.empty, false)
+		val snapshot = WorldSnapshot(1L, Seq(PlayerSnapshot("p1", 10.0, 20.0, 50.0)), Seq.empty, false)
 		server.broadcastWorldSnapshot(snapshot)
 
 		// 3. Both clients should receive the snapshot

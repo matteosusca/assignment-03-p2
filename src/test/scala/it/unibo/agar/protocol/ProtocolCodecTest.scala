@@ -21,8 +21,8 @@ class ProtocolCodecTest extends AnyFunSuite with Matchers:
     roundtrip(
       WorldSnapshot(
         tickNumber = 42L,
-        players = Seq(PlayerSnapshot("p1", 100.0, 200.0, 15.0, 200.0)),
-        foods = Seq(FoodSnapshot("f1", 150.0, 250.0, 5.0)),
+        players = Seq(PlayerSnapshot("p1", 100.0, 200.0, 200.0)),
+        foods = Seq(FoodSnapshot("f1", 150.0, 250.0)),
         isGameOver = false,
         winnerId = None
       )
@@ -30,7 +30,7 @@ class ProtocolCodecTest extends AnyFunSuite with Matchers:
     roundtrip(
       WorldSnapshot(
         tickNumber = 100L,
-        players = Seq(PlayerSnapshot("p1", 500.0, 500.0, 30.0, 1050.0)),
+        players = Seq(PlayerSnapshot("p1", 500.0, 500.0, 1050.0)),
         foods = Seq.empty,
         isGameOver = true,
         winnerId = Some("p1")

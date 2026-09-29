@@ -16,15 +16,13 @@ case class PlayerSnapshot(
 	id: String,
 	x: Double,
 	y: Double,
-	radius: Double,
 	mass: Double
 ) derives ReadWriter
 
 case class FoodSnapshot(
 	id: String,
 	x: Double,
-	y: Double,
-	radius: Double
+	y: Double
 ) derives ReadWriter
 
 case class WorldSnapshot(

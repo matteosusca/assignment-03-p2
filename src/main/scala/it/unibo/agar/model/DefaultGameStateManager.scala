@@ -1,9 +1,12 @@
 package it.unibo.agar.model
 
+import it.unibo.agar.protocol.{PlayerSnapshot, WorldSnapshot}
+
 import scala.collection.mutable
 
 class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
   private var _world: World                                   = initialWorld
+  private var tickNumber: Long = 0L
   private val playerDirections: mutable.Map[String, Position] = mutable.Map.empty
 
   _world.players.foreach(p => playerDirections.put(p.id, Position.ZERO))
@@ -14,6 +17,7 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
     if _world.getPlayerById(playerId).isDefined then playerDirections.put(playerId, Position.of(dx, dy))
 
   override def tick(): Unit =
+    tickNumber += 1
     _world = handleEating(moveAllPlayers(_world))
     cleanupPlayerDirections()
 
@@ -64,6 +68,15 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
   override def leave(playerId: String): Unit =
     _world = _world.removePlayer(playerId)
     playerDirections.remove(playerId)
+
+  override def toSnapshot(): WorldSnapshot = 
+    WorldSnapshot(
+      tickNumber = tickNumber, 
+      players = world.players.map(p => PlayerSnapshot(p.id, p.x, p.y, p.mass)), 
+      foods = world.foods.map(f => it.unibo.agar.protocol.FoodSnapshot(f.id, f.x, f.y)),
+      isGameOver = false, 
+      winnerId = None
+    )
 
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0

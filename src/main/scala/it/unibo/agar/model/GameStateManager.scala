@@ -1,5 +1,7 @@
 package it.unibo.agar.model
 
+import it.unibo.agar.protocol.WorldSnapshot
+
 trait GameStateManager:
   def world: World
   def getWorld: World = world
@@ -8,3 +10,4 @@ trait GameStateManager:
   def join(playerId: String): Unit
   def join(playerId: String, pos: Position, mass: Double = Player.DEFAULT_MASS): Unit
   def leave(playerId: String): Unit
+  def toSnapshot(): WorldSnapshot
