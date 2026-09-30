@@ -10,10 +10,11 @@ class GameStateManagerFoodTest extends AnyFunSuite with Matchers:
 
   private def createManager(
     players: List[Player] = List.empty,
-    foods: List[Food] = List.empty
+    foods: List[Food] = List.empty,
+    foodRefillStrategy: FoodRefillStrategy = FoodRefillStrategy.immediate()
   ): GameStateManager =
     val world = World(WORLD_WIDTH, WORLD_HEIGHT, players, foods)
-    DefaultGameStateManager(world)
+    DefaultGameStateManager(world, foodRefillStrategy)
 
   test("tick should refill foods up to MAX_FOOD_ITEMS when world has no food"):
     val manager = createManager(foods = List.empty)
@@ -73,3 +74,39 @@ class GameStateManagerFoodTest extends AnyFunSuite with Matchers:
       food.y should be <= WORLD_HEIGHT.toDouble
 
     foods.map(_.id).toSet.size shouldBe foods.size
+
+  test("GradualFoodRefillStrategy should refill foods incrementally at specified rate per tick"):
+    val gradualStrategy = GradualFoodRefillStrategy(maxFoods = 10, ratePerTick = 2)
+    val manager         = createManager(foods = List.empty, foodRefillStrategy = gradualStrategy)
+
+    manager.world.foods shouldBe empty
+
+    // Tick 1: adds 2 foods
+    manager.tick()
+    manager.world.foods.size shouldBe 2
+
+    // Tick 2: adds 2 foods -> 4
+    manager.tick()
+    manager.world.foods.size shouldBe 4
+
+    // Ticks 3, 4, 5: reaches 10
+    manager.tick()
+    manager.tick()
+    manager.tick()
+    manager.world.foods.size shouldBe 10
+
+    // Tick 6: capped at maxFoods (10)
+    manager.tick()
+    manager.world.foods.size shouldBe 10
+
+  test("NoFoodRefillStrategy should never add any food upon ticks"):
+    val manager = createManager(foods = List.empty, foodRefillStrategy = NoFoodRefillStrategy)
+    manager.world.foods shouldBe empty
+
+    (1 to 5).foreach(_ => manager.tick())
+
+    manager.world.foods shouldBe empty
+
+  test("DefaultGameStateManager should use gradual refill strategy by default"):
+    val manager = DefaultGameStateManager(World(WORLD_WIDTH, WORLD_HEIGHT, List.empty, List.empty))
+    manager.foodRefillStrategy shouldBe a[GradualFoodRefillStrategy]

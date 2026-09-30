@@ -1,10 +1,13 @@
 package it.unibo.agar.model
 
 import it.unibo.agar.protocol.{FoodSnapshot, PlayerSnapshot, WorldSnapshot}
-import java.util.UUID
+
 import scala.collection.mutable
 
-class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
+class DefaultGameStateManager(
+  initialWorld: World,
+  val foodRefillStrategy: FoodRefillStrategy = FoodRefillStrategy.default
+) extends GameStateManager:
   private var _world: World                                   = initialWorld
   private var tickNumber: Long                                = 0L
   private val playerDirections: mutable.Map[String, Position] = mutable.Map.empty
@@ -18,7 +21,10 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
 
   override def tick(): Unit =
     tickNumber += 1
-    _world = refillFood(handleEating(moveAllPlayers(_world)))
+    val movedWorld    = moveAllPlayers(_world)
+    val eatenWorld    = handleEating(movedWorld)
+    val refilledWorld = foodRefillStrategy.refill(eatenWorld)
+    _world = refilledWorld
     cleanupPlayerDirections()
 
   private def moveAllPlayers(currentWorld: World): World =
@@ -49,15 +55,6 @@ class DefaultGameStateManager(initialWorld: World) extends GameStateManager:
 
   private def eatenPlayers(w: World, player: Player): List[Player] =
     w.getPlayersExcludingSelf(player).filter(other => EatingManager.canEatPlayer(player, other))
-
-  private def refillFood(currentWorld: World): World =
-    val missing = DefaultGameStateManager.MAX_FOOD_ITEMS - currentWorld.foods.size
-    if missing <= 0 then currentWorld
-    else
-      val newFoods = List.fill(missing):
-        val pos = currentWorld.generateRandomPosition()
-        Food(s"food_${UUID.randomUUID().toString}", pos.x, pos.y, Food.DEFAULT_MASS)
-      currentWorld.addFoods(newFoods)
 
   private def cleanupPlayerDirections(): Unit =
     val currentPlayerIds = _world.players.map(_.id).toSet
