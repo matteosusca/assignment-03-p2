@@ -28,6 +28,9 @@ case class World(
     val newPlayers  = players.filterNot(p => idsToRemove.contains(p.id))
     copy(players = newPlayers)
 
+  def addFoods(newFoods: List[Food]): World =
+    copy(foods = foods ++ newFoods)
+
   def removeFoods(foodsToRemove: List[Food]): World =
     val toRemoveSet = foodsToRemove.toSet
     val newFoods    = foods.filterNot(toRemoveSet.contains)
