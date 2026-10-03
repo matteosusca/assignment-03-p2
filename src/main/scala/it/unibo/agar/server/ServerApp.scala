@@ -39,20 +39,18 @@ object ServerApp:
     var globalViewOpt: Option[GlobalView] = None
     if showGui then
       SwingUtilities.invokeLater(() =>
-        val view = GlobalView(gameStateManager)
+        val view = GlobalView()
         view.setVisible(true)
         globalViewOpt = Some(view)
       )
-
-    val onTick: () => Unit = () =>
-      if showGui then SwingUtilities.invokeLater(() => globalViewOpt.foreach(_.repaintView()))
 
     var networkAdapter: Option[ServerNetworkAdapter] = None
 
     val engine = ServerEngine(
       gameStateManager = gameStateManager,
-      broadcastSnapshot = snapshot => networkAdapter.foreach(_.broadcastWorldSnapshot(snapshot)),
-      onTickExecuted = onTick
+      broadcastSnapshot = snapshot =>
+        networkAdapter.foreach(_.broadcastWorldSnapshot(snapshot))
+        if showGui then SwingUtilities.invokeLater(() => globalViewOpt.foreach(_.updateSnapshot(snapshot)))
     )
 
     val adapter = ServerNetworkAdapter(connection, engine.enqueueCommand)
