@@ -25,7 +25,6 @@ class ServerNetworkAdapter(
     val body = ProtocolCodec.encode(snapshot)
     publisherChannel.basicPublish(RabbitMQConfig.WorldExchange, "", null, body)
 
-  def close(): Unit = {
-    consumerChannel.close()
-    publisherChannel.close()
-  }
+  def close(): Unit =
+    if consumerChannel.isOpen then consumerChannel.close()
+    if publisherChannel.isOpen then publisherChannel.close()
