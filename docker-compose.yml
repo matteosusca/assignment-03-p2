@@ -1,6 +1,6 @@
 services:
   rabbitmq:
-    image: rabbitmq:4-management
+    image: docker.io/library/rabbitmq:4-management
     container_name: agar-rabbitmq
     ports:
       - "5672:5672"     # Porta protocollo AMQP
