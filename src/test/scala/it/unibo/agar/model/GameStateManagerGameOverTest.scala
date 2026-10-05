@@ -3,7 +3,7 @@ package it.unibo.agar.model
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-class GameStateManageGameOverTest extends AnyFunSuite with Matchers:
+class GameStateManagerGameOverTest extends AnyFunSuite with Matchers:
 
   test("toSnapshot should report isGameOver=false and winnerId=None when all the players are below WINNING_MASS"):
     val player = Player("p1", 100.0, 100.0, mass = 200)
