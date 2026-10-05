@@ -20,12 +20,13 @@ class DefaultGameStateManager(
     if _world.getPlayerById(playerId).isDefined then playerDirections.put(playerId, Position.of(dx, dy))
 
   override def tick(): Unit =
-    tickNumber += 1
-    val movedWorld    = moveAllPlayers(_world)
-    val eatenWorld    = handleEating(movedWorld)
-    val refilledWorld = foodRefillStrategy.refill(eatenWorld)
-    _world = refilledWorld
-    cleanupPlayerDirections()
+    if !isGameOver then
+      tickNumber += 1
+      val movedWorld    = moveAllPlayers(_world)
+      val eatenWorld    = handleEating(movedWorld)
+      val refilledWorld = foodRefillStrategy.refill(eatenWorld)
+      _world = refilledWorld
+      cleanupPlayerDirections()
 
   private def moveAllPlayers(currentWorld: World): World =
     val updatedPlayers = currentWorld.players.map { player =>
@@ -75,18 +76,24 @@ class DefaultGameStateManager(
     _world = _world.removePlayer(playerId)
     playerDirections.remove(playerId)
 
-  override def toSnapshot(): WorldSnapshot =
+  override def toSnapshot(): WorldSnapshot = {
+    val currentWinner = winner
     WorldSnapshot(
       tickNumber = tickNumber,
       players = world.players.map(_.toSnapshot),
       foods = world.foods.map(_.toSnapshot),
-      isGameOver = false,
-      winnerId = None
+      isGameOver = isGameOver,
+      winnerId = currentWinner.map(_.id)
     )
+  }
+
+  def winner: Option[Player] = world.players.find(_.mass >= DefaultGameStateManager.WINNING_MASS)
+  def isGameOver: Boolean = winner.isDefined
 
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0
   val MAX_FOOD_ITEMS: Int  = 150
+  val WINNING_MASS: Double  = 1000.0
 
 extension (p: Player)
   def toSnapshot: PlayerSnapshot = PlayerSnapshot(p.id, p.x, p.y, p.mass)
