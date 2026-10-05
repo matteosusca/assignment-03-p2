@@ -45,10 +45,15 @@ object ServerApp:
       )
 
     var networkAdapter: Option[ServerNetworkAdapter] = None
+    var gameOverLogged: Boolean                     = false
 
     val engine = ServerEngine(
       gameStateManager = gameStateManager,
       broadcastSnapshot = snapshot =>
+        if snapshot.isGameOver && !gameOverLogged then
+          gameOverLogged = true
+          val winnerMsg = snapshot.winnerId.map(w => s"Winner is '$w'!").getOrElse("Game Over!")
+          println(s"[ServerApp] Game Over reached! $winnerMsg")
         networkAdapter.foreach(_.broadcastWorldSnapshot(snapshot))
         if showGui then SwingUtilities.invokeLater(() => globalViewOpt.foreach(_.updateSnapshot(snapshot)))
     )

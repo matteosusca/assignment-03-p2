@@ -29,11 +29,16 @@ object ClientApp:
 
     // start view and network adapter
     var localViewOpt: Option[LocalView] = None
+    var gameOverLogged: Boolean         = false
 
     val networkAdapter = ClientNetworkAdapter(
       connection = connection,
-      onWorldSnapshotReceived =
-        snapshot => SwingUtilities.invokeLater(() => localViewOpt.foreach(_.updateSnapshot(snapshot)))
+      onWorldSnapshotReceived = snapshot =>
+        if snapshot.isGameOver && !gameOverLogged then
+          gameOverLogged = true
+          val winnerMsg = snapshot.winnerId.map(w => s"Winner is '$w'!").getOrElse("Game Over!")
+          println(s"[ClientApp] Game Over reached! $winnerMsg")
+        SwingUtilities.invokeLater(() => localViewOpt.foreach(_.updateSnapshot(snapshot)))
     )
 
     val localView = LocalView(

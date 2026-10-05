@@ -3,14 +3,12 @@ package it.unibo.agar.view
 import it.unibo.agar.model.Food
 import it.unibo.agar.protocol.WorldSnapshot
 
-import java.awt.{Color, Graphics2D}
+import java.awt.{Color, Font, Graphics2D}
 
 object AgarViewUtils:
 
   val FOOD_RADIUS: Double = massToRadius(Food.DEFAULT_MASS)
   private val PLAYER_BORDER_COLOR: Color = Color.BLACK
-  private val PLAYER_LABEL_OFFSET_X: Int = 10
-  private val PLAYER_LABEL_OFFSET_Y: Int = 0
   private val PLAYER_PALETTE: Array[Color] = Array(
     Color.BLUE,
     Color.ORANGE,
@@ -34,10 +32,40 @@ object AgarViewUtils:
       val positioning = getPositioningInfo(player.x, player.y, massToRadius(player.mass), offsetX, offsetY)
       g.setColor(getPlayerColor(player.id))
       g.fillOval(positioning.x, positioning.y, positioning.diameter, positioning.diameter)
-      // Draw player ID
+      // Draw player ID and mass
       g.setColor(PLAYER_BORDER_COLOR)
-      // Adjust label position to be relative to the player's actual center on screen
-      g.drawString(player.id, positioning.x - PLAYER_LABEL_OFFSET_X, positioning.y - PLAYER_LABEL_OFFSET_Y)
+      val label = s"${player.id} (${player.mass.toInt})"
+      val labelWidth = g.getFontMetrics.stringWidth(label)
+      val labelX = positioning.x + positioning.radius - (labelWidth / 2)
+      val labelY = positioning.y - 5
+      g.drawString(label, labelX, labelY)
+
+  def drawGameOver(g: Graphics2D, snapshot: WorldSnapshot, screenWidth: Int, screenHeight: Int): Unit =
+    val text = snapshot.winnerId match
+      case Some(winner) => s"GAME OVER - WINNER: $winner"
+      case None         => "GAME OVER"
+
+    val prevFont = g.getFont
+    val font = Font("SansSerif", Font.BOLD, 26)
+    g.setFont(font)
+    val metrics = g.getFontMetrics(font)
+    val textWidth = metrics.stringWidth(text)
+    val textHeight = metrics.getHeight
+
+    val bannerHeight = 80
+    val bannerY = (screenHeight - bannerHeight) / 2
+
+    // Dark semi-transparent background banner across the screen
+    g.setColor(Color(0, 0, 0, 190))
+    g.fillRect(0, bannerY, screenWidth, bannerHeight)
+
+    // Golden / Yellow text centered in the banner
+    g.setColor(Color.YELLOW)
+    val textX = (screenWidth - textWidth) / 2
+    val textY = bannerY + ((bannerHeight - textHeight) / 2) + metrics.getAscent
+    g.drawString(text, textX, textY)
+
+    g.setFont(prevFont)
 
   def massToRadius(mass: Double): Double = Math.sqrt(mass / Math.PI)
 

@@ -26,4 +26,6 @@ class GamePanel(val focusedPlayerId: Option[String] = None) extends JPanel:
         case Some(player) => (player.x - getWidth / 2.0, player.y - getHeight / 2.0)
         case None         => (0.0, 0.0)
       AgarViewUtils.drawWorld(g2d, snapshot, offsetX, offsetY)
+      if snapshot.isGameOver then
+        AgarViewUtils.drawGameOver(g2d, snapshot, getWidth, getHeight)
     }
