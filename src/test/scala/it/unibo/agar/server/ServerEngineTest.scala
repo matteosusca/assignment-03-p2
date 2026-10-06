@@ -59,3 +59,49 @@ class ServerEngineTest extends AnyFunSuite with Matchers:
 
     engine.step()
     getLastSnapshot().get.tickNumber shouldBe 2L
+
+  test("step should evict players whose inactivity exceeds the threshold"):
+    var currentTime = 1000L
+    val world = World(1000, 1000, List.empty, List.empty)
+    val manager = new DefaultGameStateManager(world, FoodRefillStrategy.immediate(0))
+    var lastSnapshot: Option[WorldSnapshot] = None
+    val engine = ServerEngine(
+      gameStateManager = manager,
+      broadcastSnapshot = s => lastSnapshot = Some(s),
+      inactivityThresholdMs = 1000L,
+      timeProvider = () => currentTime
+    )
+
+    engine.enqueueCommand(PlayerCommand.Join("p1"))
+    engine.step()
+    lastSnapshot.get.players.map(_.id) should contain("p1")
+
+    currentTime += 1500L
+    engine.step()
+
+    lastSnapshot.get.players.exists(_.id == "p1") shouldBe false
+
+  test("heartbeat command should refresh player's last activity and prevent eviction"):
+    var currentTime = 1000L
+    val world = World(1000, 1000, List.empty, List.empty)
+    val manager = new DefaultGameStateManager(world, FoodRefillStrategy.immediate(0))
+    var lastSnapshot: Option[WorldSnapshot] = None
+    val engine = ServerEngine(
+      gameStateManager = manager,
+      broadcastSnapshot = s => lastSnapshot = Some(s),
+      inactivityThresholdMs = 1000L,
+      timeProvider = () => currentTime
+    )
+
+    engine.enqueueCommand(PlayerCommand.Join("p1"))
+    engine.step()
+    lastSnapshot.get.players.map(_.id) should contain("p1")
+
+    currentTime = 1600L
+    engine.enqueueCommand(PlayerCommand.Heartbeat("p1"))
+    engine.step()
+    lastSnapshot.get.players.map(_.id) should contain("p1")
+
+    currentTime = 2800L
+    engine.step()
+    lastSnapshot.get.players.exists(_.id == "p1") shouldBe false
