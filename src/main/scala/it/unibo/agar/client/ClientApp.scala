@@ -5,6 +5,7 @@ import it.unibo.agar.protocol.PlayerCommand
 import it.unibo.agar.view.LocalView
 
 import java.awt.event.{WindowAdapter, WindowEvent}
+import java.util.concurrent.{Executors, TimeUnit}
 import javax.swing.SwingUtilities
 import scala.util.{Failure, Success, Try}
 
@@ -47,10 +48,23 @@ object ClientApp:
     )
     localViewOpt = Some(localView)
 
+    val heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(r =>
+      val t = Thread(r, s"heartbeat-$playerId")
+      t.setDaemon(true)
+      t
+    )
+    heartbeatScheduler.scheduleAtFixedRate(
+      () => Try(networkAdapter.sendCommand(PlayerCommand.Heartbeat(playerId))),
+      2L,
+      2L,
+      TimeUnit.SECONDS
+    )
+
     var hasShutdown = false
     val shutdown: () => Unit = () =>
       if !hasShutdown then
         hasShutdown = true
+        heartbeatScheduler.shutdown()
         println(s"[ClientApp] Leaving game for player '$playerId'...")
         Try(networkAdapter.sendCommand(PlayerCommand.Leave(playerId)))
         Try(networkAdapter.close())
