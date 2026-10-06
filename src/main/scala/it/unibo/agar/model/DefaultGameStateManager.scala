@@ -31,8 +31,10 @@ class DefaultGameStateManager(
   private def moveAllPlayers(currentWorld: World): World =
     val updatedPlayers = currentWorld.players.map { player =>
       val direction = playerDirections.getOrElse(player.id, Position.ZERO)
-      val newX      = player.x + direction.x * DefaultGameStateManager.PLAYER_SPEED
-      val newY      = player.y + direction.y * DefaultGameStateManager.PLAYER_SPEED
+      val rawX      = player.x + direction.x * DefaultGameStateManager.PLAYER_SPEED
+      val rawY      = player.y + direction.y * DefaultGameStateManager.PLAYER_SPEED
+      val newX      = rawX.max(0.0).min(currentWorld.width.toDouble)
+      val newY      = rawY.max(0.0).min(currentWorld.height.toDouble)
       player.moveTo(newX, newY)
     }
     currentWorld.copy(players = updatedPlayers)
