@@ -95,7 +95,7 @@ class DefaultGameStateManager(
 object DefaultGameStateManager:
   val PLAYER_SPEED: Double = 2.0
   val MAX_FOOD_ITEMS: Int  = 150
-  val WINNING_MASS: Double  = 1000.0
+  val WINNING_MASS: Double = 10000.0
 
 extension (p: Player)
   def toSnapshot: PlayerSnapshot = PlayerSnapshot(p.id, p.x, p.y, p.mass)
