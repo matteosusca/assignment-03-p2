@@ -40,13 +40,21 @@ class ServerEngine(
       lastActivityTimestamps --= expired.keys
 
   private def processPendingCommands(): Unit =
+    val now = timeProvider()
     var command = commandQueue.poll()
     while command != null do
       command match
-        case PlayerCommand.Join(id)         => gameStateManager.join(id); lastActivityTimestamps(id) = timeProvider()
-        case PlayerCommand.Move(id, dx, dy) => gameStateManager.setPlayerDirection(id, dx, dy); lastActivityTimestamps(id) = timeProvider()
-        case PlayerCommand.Heartbeat(id)    => lastActivityTimestamps(id) = timeProvider()
-        case PlayerCommand.Leave(id)        => gameStateManager.leave(id); lastActivityTimestamps.remove(id)
+        case PlayerCommand.Join(id) =>
+          gameStateManager.join(id)
+          lastActivityTimestamps(id) = now
+        case PlayerCommand.Move(id, dx, dy) =>
+          gameStateManager.setPlayerDirection(id, dx, dy)
+          if gameStateManager.world.getPlayerById(id).isDefined then lastActivityTimestamps(id) = now
+        case PlayerCommand.Heartbeat(id) =>
+          if gameStateManager.world.getPlayerById(id).isDefined then lastActivityTimestamps(id) = now
+        case PlayerCommand.Leave(id) =>
+          gameStateManager.leave(id)
+          lastActivityTimestamps.remove(id)
       command = commandQueue.poll()
 
   def start(): Unit =

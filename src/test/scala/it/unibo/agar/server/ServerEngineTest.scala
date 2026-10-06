@@ -105,3 +105,17 @@ class ServerEngineTest extends AnyFunSuite with Matchers:
     currentTime = 2800L
     engine.step()
     lastSnapshot.get.players.exists(_.id == "p1") shouldBe false
+
+  test("heartbeat for non-existent player should not track or create ghost entity"):
+    val world = World(1000, 1000, List.empty, List.empty)
+    val manager = new DefaultGameStateManager(world, FoodRefillStrategy.immediate(0))
+    var lastSnapshot: Option[WorldSnapshot] = None
+    val engine = ServerEngine(
+      gameStateManager = manager,
+      broadcastSnapshot = s => lastSnapshot = Some(s),
+      inactivityThresholdMs = 1000L
+    )
+
+    engine.enqueueCommand(PlayerCommand.Heartbeat("ghost"))
+    engine.step()
+    lastSnapshot.get.players.exists(_.id == "ghost") shouldBe false

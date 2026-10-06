@@ -14,6 +14,7 @@ class ProtocolCodecTest extends AnyFunSuite with Matchers:
     Seq(
       PlayerCommand.Join("p1"),
       PlayerCommand.Move("p1", 1.5, -0.8),
+      PlayerCommand.Heartbeat("p1"),
       PlayerCommand.Leave("p1")
     ).foreach(roundtrip)
 
