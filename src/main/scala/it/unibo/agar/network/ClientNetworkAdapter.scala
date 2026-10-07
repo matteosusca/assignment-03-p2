@@ -13,7 +13,10 @@ class ClientNetworkAdapter(
   RabbitMQConfig.setupTopology(consumerChannel)
 
   // temporary queue
-  private val privateQueue: String = consumerChannel.queueDeclare().getQueue()
+  private val queueArgs: java.util.Map[String, AnyRef] =
+    java.util.Map.of("x-max-length", Integer.valueOf(1), "x-overflow", "drop-head")
+  private val privateQueue: String =
+    consumerChannel.queueDeclare("", false, true, true, queueArgs).getQueue
   consumerChannel.queueBind(privateQueue, RabbitMQConfig.WorldExchange, "")
 
   // receive world snapshots from the server
