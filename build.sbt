@@ -4,7 +4,7 @@ ThisBuild / scalaVersion := "3.3.6"
 lazy val root = (project in file("."))
   .settings(
     name := "agar-io",
-    Compile / mainClass := Some("it.unibo.agar.Main"),
+    Compile / mainClass := Some("it.unibo.agar.server.ServerApp"),
     fork := true,
     libraryDependencies ++= Seq(
       "com.rabbitmq" % "amqp-client" % "5.25.0",
@@ -13,3 +13,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % "3.2.19" % Test
     )
   )
+
+addCommandAlias("runServer", "runMain it.unibo.agar.server.ServerApp")
+addCommandAlias("runClient", "runMain it.unibo.agar.client.ClientApp")
+

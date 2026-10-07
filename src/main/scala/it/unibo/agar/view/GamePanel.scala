@@ -2,7 +2,7 @@ package it.unibo.agar.view
 
 import it.unibo.agar.protocol.WorldSnapshot
 
-import java.awt.{Graphics, Graphics2D}
+import java.awt.{Color, Graphics, Graphics2D, RenderingHints, Toolkit}
 import javax.swing.JPanel
 
 class GamePanel(val focusedPlayerId: Option[String] = None) extends JPanel:
@@ -13,6 +13,8 @@ class GamePanel(val focusedPlayerId: Option[String] = None) extends JPanel:
     this(Option(focusedPlayerId))
 
   setFocusable(true)
+  setDoubleBuffered(true)
+  setBackground(Color.WHITE)
 
   def updateSnapshot(snapshot: WorldSnapshot): Unit =
     currentSnapshot = Some(snapshot)
@@ -21,6 +23,9 @@ class GamePanel(val focusedPlayerId: Option[String] = None) extends JPanel:
   override protected def paintComponent(g: Graphics): Unit =
     super.paintComponent(g)
     val g2d = g.asInstanceOf[Graphics2D]
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
+
     currentSnapshot.foreach { snapshot =>
       val (offsetX, offsetY) = focusedPlayerId.flatMap(pid => snapshot.players.find(_.id == pid)) match
         case Some(player) => (player.x - getWidth / 2.0, player.y - getHeight / 2.0)
@@ -29,3 +34,5 @@ class GamePanel(val focusedPlayerId: Option[String] = None) extends JPanel:
       if snapshot.isGameOver then
         AgarViewUtils.drawGameOver(g2d, snapshot, getWidth, getHeight)
     }
+
+    Toolkit.getDefaultToolkit.sync()

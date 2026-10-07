@@ -2,14 +2,17 @@ package it.unibo.agar.client
 
 import it.unibo.agar.network.{ClientNetworkAdapter, RabbitMQConfig}
 import it.unibo.agar.protocol.PlayerCommand
+import it.unibo.agar.protocol.WorldSnapshot
 import it.unibo.agar.view.LocalView
-
 import java.awt.event.{WindowAdapter, WindowEvent}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.concurrent.{Executors, TimeUnit}
 import javax.swing.SwingUtilities
 import scala.util.{Failure, Success, Try}
 
 object ClientApp:
+
+  val MOVE_SAMPLING_INTERVAL_MS: Long = 30L
 
   def main(args: Array[String]): Unit =
     val playerId = args.find(a => !a.startsWith("-")).getOrElse("p1")
@@ -32,6 +35,9 @@ object ClientApp:
     var localViewOpt: Option[LocalView] = None
     var gameOverLogged: Boolean         = false
 
+    val latestSnapshot   = new AtomicReference[WorldSnapshot]()
+    val isRepaintPending = new AtomicBoolean(false)
+
     val networkAdapter = ClientNetworkAdapter(
       connection = connection,
       onWorldSnapshotReceived = snapshot =>
@@ -39,21 +45,41 @@ object ClientApp:
           gameOverLogged = true
           val winnerMsg = snapshot.winnerId.map(w => s"Winner is '$w'!").getOrElse("Game Over!")
           println(s"[ClientApp] Game Over reached! $winnerMsg")
-        SwingUtilities.invokeLater(() => localViewOpt.foreach(_.updateSnapshot(snapshot)))
+        latestSnapshot.set(snapshot)
+        if isRepaintPending.compareAndSet(false, true) then
+          SwingUtilities.invokeLater: () =>
+            isRepaintPending.set(false)
+            val current = latestSnapshot.get()
+            if current != null then localViewOpt.foreach(_.updateSnapshot(current))
     )
+
+    val currentDirection  = new AtomicReference[(Double, Double)]((0.0, 0.0))
+    var lastSentDirection = (0.0, 0.0)
 
     val localView = LocalView(
       playerId = playerId,
-      onDirectionChanged = (dx, dy) => networkAdapter.sendCommand(PlayerCommand.Move(playerId, dx, dy))
+      onDirectionChanged = (dx, dy) => currentDirection.set((dx, dy))
     )
     localViewOpt = Some(localView)
 
-    val heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(r =>
-      val t = Thread(r, s"heartbeat-$playerId")
+    val clientScheduler = Executors.newSingleThreadScheduledExecutor(r =>
+      val t = Thread(r, s"client-io-$playerId")
       t.setDaemon(true)
       t
     )
-    heartbeatScheduler.scheduleAtFixedRate(
+
+    clientScheduler.scheduleAtFixedRate(
+      () =>
+        val (dx, dy) = currentDirection.get()
+        if (dx != 0.0 || dy != 0.0) || (lastSentDirection._1 != 0.0 || lastSentDirection._2 != 0.0) then
+          lastSentDirection = (dx, dy)
+          Try(networkAdapter.sendCommand(PlayerCommand.Move(playerId, dx, dy))),
+      0L,
+      ClientApp.MOVE_SAMPLING_INTERVAL_MS,
+      TimeUnit.MILLISECONDS
+    )
+
+    clientScheduler.scheduleAtFixedRate(
       () => Try(networkAdapter.sendCommand(PlayerCommand.Heartbeat(playerId))),
       2L,
       2L,
@@ -64,7 +90,7 @@ object ClientApp:
     val shutdown: () => Unit = () =>
       if !hasShutdown then
         hasShutdown = true
-        heartbeatScheduler.shutdown()
+        clientScheduler.shutdown()
         println(s"[ClientApp] Leaving game for player '$playerId'...")
         Try(networkAdapter.sendCommand(PlayerCommand.Leave(playerId)))
         Try(networkAdapter.close())
